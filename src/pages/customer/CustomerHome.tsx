@@ -12,9 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const CustomerHome = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('New York, NY');
+  const [currentLocation, setCurrentLocation] = useState('New York, NY');
   const featuredServices = getFeaturedServices();
 
   const handleCategoryClick = (categoryId: string) => {
@@ -41,7 +41,7 @@ const CustomerHome = () => {
             <div className="text-left">
               <p className="text-xs text-muted-foreground">Location</p>
               <div className="flex items-center gap-1">
-                <span className="font-semibold text-foreground">{location}</span>
+                <span className="font-semibold text-foreground">{currentLocation}</span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
@@ -62,7 +62,7 @@ const CustomerHome = () => {
         {/* Welcome Message */}
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-foreground">
-            Hello, {user?.name?.split(' ')[0] || 'there'} 👋
+            Hello, {profile?.full_name?.split(' ')[0] || 'there'} 👋
           </h1>
           <p className="text-muted-foreground">What service do you need today?</p>
         </div>

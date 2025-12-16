@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, MapPin, ArrowLeft } from 'lucide-react';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, isAuthenticated, role, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState<'form' | 'role'>('form');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +19,26 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && role) {
+      redirectByRole(role);
+    }
+  }, [isAuthenticated, role]);
+
+  const redirectByRole = (userRole: string) => {
+    switch (userRole) {
+      case 'provider':
+        navigate('/provider/requests');
+        break;
+      case 'admin':
+        navigate('/admin/dashboard');
+        break;
+      default:
+        navigate('/home');
+    }
+  };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +50,14 @@ const Signup = () => {
       toast.error('Password must be at least 6 characters');
       return;
     }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    
     setStep('role');
   };
 
@@ -37,21 +65,32 @@ const Signup = () => {
     setSelectedRole(role);
     setIsLoading(true);
     
-    try {
-      await signup(name, email, password, role);
-      toast.success('Account created successfully!');
-      
-      if (role === 'provider') {
-        navigate('/provider/requests');
+    const { error } = await signup(name, email, password, role);
+    
+    if (error) {
+      if (error.message.includes('already registered')) {
+        toast.error('An account with this email already exists');
       } else {
-        navigate('/home');
+        toast.error(error.message || 'Signup failed. Please try again.');
       }
-    } catch (error) {
-      toast.error('Signup failed. Please try again.');
-    } finally {
       setIsLoading(false);
+      return;
     }
+    
+    toast.success('Account created! Please check your email to confirm your account.');
+    setIsLoading(false);
+    navigate('/login');
   };
+
+  if (authLoading) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   if (step === 'role') {
     return (
@@ -162,6 +201,7 @@ const Signup = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="pl-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="name"
             />
           </div>
 
@@ -174,6 +214,7 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="pl-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="email"
             />
           </div>
 
@@ -186,6 +227,7 @@ const Signup = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-12 pr-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -217,7 +259,7 @@ const Signup = () => {
           </div>
 
           {/* Social Signup */}
-          <Button variant="outline" size="lg" fullWidth type="button">
+          <Button variant="outline" size="lg" fullWidth type="button" disabled>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
