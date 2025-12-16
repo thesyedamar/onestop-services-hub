@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
@@ -11,38 +11,69 @@ import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, role, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && role) {
+      redirectByRole(role);
+    }
+  }, [isAuthenticated, role]);
+
+  const redirectByRole = (userRole: string) => {
+    switch (userRole) {
+      case 'provider':
+        navigate('/provider/requests');
+        break;
+      case 'admin':
+        navigate('/admin/dashboard');
+        break;
+      default:
+        navigate('/home');
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!email || !password) {
       toast.error('Please fill in all fields');
       return;
     }
     
     setIsLoading(true);
-    try {
-      await login(email, password);
-      toast.success('Welcome back!');
-      
-      // Navigate based on email (demo purposes)
-      if (email.includes('provider')) {
-        navigate('/provider/requests');
-      } else if (email.includes('admin')) {
-        navigate('/admin/dashboard');
+    
+    const { error } = await login(email, password);
+    
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password');
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error('Please check your email and confirm your account');
       } else {
-        navigate('/home');
+        toast.error(error.message || 'Login failed. Please try again.');
       }
-    } catch (error) {
-      toast.error('Login failed. Please try again.');
-    } finally {
       setIsLoading(false);
+      return;
     }
+    
+    toast.success('Welcome back!');
+    setIsLoading(false);
   };
+
+  if (authLoading) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout>
@@ -77,6 +108,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="pl-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="email"
             />
           </div>
 
@@ -89,6 +121,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-12 pr-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="current-password"
             />
             <button
               type="button"
@@ -115,16 +148,6 @@ const Login = () => {
             {isLoading ? <LoadingSpinner size="sm" /> : 'Sign In'}
           </Button>
 
-          {/* Demo accounts info */}
-          <div className="bg-muted/50 rounded-xl p-4 mt-4">
-            <p className="text-xs text-muted-foreground text-center mb-2">Demo accounts:</p>
-            <div className="text-xs text-center space-y-1">
-              <p><span className="font-medium">customer@demo.com</span> → Customer</p>
-              <p><span className="font-medium">provider@demo.com</span> → Provider</p>
-              <p><span className="font-medium">admin@demo.com</span> → Admin</p>
-            </div>
-          </div>
-
           {/* Divider */}
           <div className="flex items-center gap-4 my-4">
             <div className="flex-1 h-px bg-border" />
@@ -133,7 +156,7 @@ const Login = () => {
           </div>
 
           {/* Social Login */}
-          <Button variant="outline" size="lg" fullWidth type="button">
+          <Button variant="outline" size="lg" fullWidth type="button" disabled>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path
                 fill="currentColor"

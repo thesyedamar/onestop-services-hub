@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -40,13 +40,13 @@ const Profile = () => {
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center">
               <span className="text-3xl font-bold text-primary-foreground">
-                {user?.name?.charAt(0) || 'U'}
+                {profile?.full_name?.charAt(0) || 'U'}
               </span>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">{user?.name || 'User'}</h2>
+              <h2 className="text-xl font-bold text-foreground">{profile?.full_name || 'User'}</h2>
               <p className="text-muted-foreground">{user?.email}</p>
-              <p className="text-sm text-muted-foreground">{user?.phone || 'No phone added'}</p>
+              <p className="text-sm text-muted-foreground">{profile?.phone || 'No phone added'}</p>
             </div>
           </div>
 

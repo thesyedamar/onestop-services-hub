@@ -40,9 +40,9 @@ const getNavItems = (role: UserRole): NavItem[] => {
 };
 
 export const BottomNavBar = () => {
-  const { user } = useAuth();
+  const { role } = useAuth();
   const location = useLocation();
-  const navItems = getNavItems(user?.role || 'customer');
+  const navItems = getNavItems(role || 'customer');
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto">
