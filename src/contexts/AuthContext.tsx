@@ -19,7 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signup: (name: string, email: string, password: string, role: UserRole) => Promise<{ error: Error | null }>;
+  signup: (name: string, email: string, phone: string, password: string, role: UserRole) => Promise<{ error: Error | null }>;
   logout: () => Promise<void>;
 }
 
@@ -105,10 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
-  const signup = async (name: string, email: string, password: string, selectedRole: UserRole) => {
+  const signup = async (name: string, email: string, phone: string, password: string, selectedRole: UserRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    // Pass role in metadata - trigger will handle role creation
+    // Pass role and phone in metadata - trigger will handle creation
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -116,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: name,
+          phone: phone,
           role: selectedRole,
         },
       },
