@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, MapPin, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, MapPin, ArrowLeft, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -15,6 +15,7 @@ const Signup = () => {
   const [step, setStep] = useState<'form' | 'role'>('form');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -42,7 +43,7 @@ const Signup = () => {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !password) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -57,6 +58,13 @@ const Signup = () => {
       toast.error('Please enter a valid email address');
       return;
     }
+
+    // Basic phone validation (at least 10 digits)
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
     
     setStep('role');
   };
@@ -65,7 +73,7 @@ const Signup = () => {
     setSelectedRole(role);
     setIsLoading(true);
     
-    const { error } = await signup(name, email, password, role);
+    const { error } = await signup(name, email, phone, password, role);
     
     if (error) {
       if (error.message.includes('already registered')) {
@@ -215,6 +223,19 @@ const Signup = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="pl-12 h-14 rounded-xl bg-card border-border/50 text-base"
               autoComplete="email"
+            />
+          </div>
+
+          {/* Phone Input */}
+          <div className="relative">
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="tel"
+              placeholder="Phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="pl-12 h-14 rounded-xl bg-card border-border/50 text-base"
+              autoComplete="tel"
             />
           </div>
 
