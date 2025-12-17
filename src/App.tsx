@@ -34,16 +34,21 @@ const queryClient = new QueryClient();
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, role, isLoading } = useAuth();
+  
+  // Show nothing while loading auth state
+  if (isLoading) {
+    return null;
+  }
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
     // Redirect to appropriate home based on role
-    if (user.role === 'provider') return <Navigate to="/provider/requests" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (role === 'provider') return <Navigate to="/provider/requests" replace />;
+    if (role === 'admin') return <Navigate to="/admin/dashboard" replace />;
     return <Navigate to="/home" replace />;
   }
   
