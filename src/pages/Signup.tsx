@@ -1,24 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, MapPin, ArrowLeft, Phone } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { toast } from 'sonner';
 
 const Signup = () => {
   const navigate = useNavigate();
   const { signup, isAuthenticated, role, isLoading: authLoading } = useAuth();
-  const [step, setStep] = useState<'form' | 'role'>('form');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
@@ -41,7 +39,7 @@ const Signup = () => {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !phone || !password) {
       toast.error('Please fill in all fields');
@@ -66,14 +64,9 @@ const Signup = () => {
       return;
     }
     
-    setStep('role');
-  };
-
-  const handleRoleSelect = async (role: UserRole) => {
-    setSelectedRole(role);
+    // All users sign up as customers
     setIsLoading(true);
-    
-    const { error } = await signup(name, email, phone, password, role);
+    const { error } = await signup(name, email, phone, password, 'customer');
     
     if (error) {
       if (error.message.includes('already registered')) {
@@ -100,81 +93,7 @@ const Signup = () => {
     );
   }
 
-  if (step === 'role') {
-    return (
-      <MobileLayout>
-        <div className="min-h-screen flex flex-col px-6 py-8 safe-top safe-bottom">
-          {/* Back Button */}
-          <motion.button
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => setStep('form')}
-            className="flex items-center gap-2 text-muted-foreground mb-8"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back</span>
-          </motion.button>
-
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-3xl font-bold text-foreground">Choose Your Role</h1>
-            <p className="text-muted-foreground mt-2">Select how you want to use OneStop</p>
-          </motion.div>
-
-          {/* Role Selection */}
-          <div className="flex flex-col gap-4 flex-1">
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              onClick={() => handleRoleSelect('customer')}
-              disabled={isLoading}
-              className={`p-6 rounded-2xl border-2 text-left tap-highlight transition-all ${
-                selectedRole === 'customer'
-                  ? 'border-primary bg-primary-soft'
-                  : 'border-border bg-card hover:border-primary/50'
-              }`}
-            >
-              <div className="w-14 h-14 rounded-xl bg-primary-soft flex items-center justify-center mb-4">
-                <User className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-1">I'm a Customer</h3>
-              <p className="text-muted-foreground">Browse and book services from trusted providers</p>
-            </motion.button>
-
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => handleRoleSelect('provider')}
-              disabled={isLoading}
-              className={`p-6 rounded-2xl border-2 text-left tap-highlight transition-all ${
-                selectedRole === 'provider'
-                  ? 'border-accent bg-accent-soft'
-                  : 'border-border bg-card hover:border-accent/50'
-              }`}
-            >
-              <div className="w-14 h-14 rounded-xl bg-accent-soft flex items-center justify-center mb-4">
-                <MapPin className="h-7 w-7 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-1">I'm a Service Provider</h3>
-              <p className="text-muted-foreground">Offer your services and grow your business</p>
-            </motion.button>
-          </div>
-
-          {isLoading && (
-            <div className="flex justify-center py-4">
-              <LoadingSpinner size="md" />
-            </div>
-          )}
-        </div>
-      </MobileLayout>
-    );
-  }
+  // Role selection removed - all users sign up as customers
 
   return (
     <MobileLayout>
@@ -267,9 +186,9 @@ const Signup = () => {
             <Link to="/privacy" className="text-primary font-medium">Privacy Policy</Link>
           </p>
 
-          {/* Continue Button */}
-          <Button type="submit" size="lg" fullWidth className="mt-4">
-            Continue
+          {/* Sign Up Button */}
+          <Button type="submit" size="lg" fullWidth className="mt-4" disabled={isLoading}>
+            {isLoading ? <LoadingSpinner size="sm" /> : 'Sign Up'}
           </Button>
 
           {/* Divider */}
