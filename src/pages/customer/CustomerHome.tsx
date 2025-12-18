@@ -7,15 +7,18 @@ import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { CategoryCard } from '@/components/ui/CategoryCard';
 import { ServiceCard } from '@/components/ui/ServiceCard';
 import { Input } from '@/components/ui/input';
-import { categories, getFeaturedServices } from '@/data/services';
+import { categories } from '@/data/services';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFeaturedServices, useCategoryServiceCount } from '@/hooks/useServices';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CustomerHome = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentLocation, setCurrentLocation] = useState('New York, NY');
-  const featuredServices = getFeaturedServices();
+  const { services: featuredServices, loading: featuredLoading } = useFeaturedServices();
+  const { counts: categoryCounts } = useCategoryServiceCount();
 
   const handleCategoryClick = (categoryId: string) => {
     navigate(`/category/${categoryId}`);
@@ -109,7 +112,7 @@ const CustomerHome = () => {
                   title={category.title.split(' ')[0]}
                   icon={category.icon}
                   color={category.color}
-                  count={category.count}
+                  count={categoryCounts[category.id] || 0}
                   onClick={() => handleCategoryClick(category.id)}
                 />
               </motion.div>
@@ -125,27 +128,36 @@ const CustomerHome = () => {
           </div>
 
           <div className="flex flex-col gap-4">
-            {featuredServices.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <ServiceCard
-                  id={service.id}
-                  title={service.title}
-                  provider={service.provider}
-                  rating={service.rating}
-                  reviewCount={service.reviewCount}
-                  price={service.price}
-                  priceUnit={service.priceUnit}
-                  duration={service.duration}
-                  distance={service.distance}
-                  onClick={() => handleServiceClick(service.id)}
-                />
-              </motion.div>
-            ))}
+            {featuredLoading ? (
+              <>
+                <Skeleton className="h-28 rounded-xl" />
+                <Skeleton className="h-28 rounded-xl" />
+              </>
+            ) : featuredServices.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No featured services yet</p>
+            ) : (
+              featuredServices.map((service, index) => (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ServiceCard
+                    id={service.id}
+                    title={service.title}
+                    provider={service.provider}
+                    rating={Number(service.rating)}
+                    reviewCount={service.review_count}
+                    price={Number(service.price)}
+                    priceUnit={service.price_unit}
+                    duration={service.duration || undefined}
+                    distance={service.distance || undefined}
+                    onClick={() => handleServiceClick(service.id)}
+                  />
+                </motion.div>
+              ))
+            )}
           </div>
         </section>
       </PageContainer>

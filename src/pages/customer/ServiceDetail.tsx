@@ -6,8 +6,10 @@ import { MobileLayout, PageContainer } from '@/components/layout/MobileLayout';
 import { Button } from '@/components/ui/button';
 import { ProviderMiniProfile } from '@/components/ui/ProviderMiniProfile';
 import { ModalSheet } from '@/components/ui/ModalSheet';
-import { getServiceById, getCategoryById } from '@/data/services';
+import { getCategoryById } from '@/data/services';
+import { useServiceById } from '@/hooks/useServices';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ServiceDetail = () => {
   const navigate = useNavigate();
@@ -17,8 +19,23 @@ const ServiceDetail = () => {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const service = getServiceById(serviceId || '');
-  const category = service ? getCategoryById(service.categoryId) : null;
+  const { service, loading } = useServiceById(serviceId || '');
+  const category = service ? getCategoryById(service.category_id) : null;
+
+  if (loading) {
+    return (
+      <MobileLayout>
+        <div className="h-56 bg-muted animate-pulse" />
+        <PageContainer className="-mt-6 relative">
+          <div className="bg-card rounded-t-3xl shadow-lg -mx-4 px-4 pt-6 space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </PageContainer>
+      </MobileLayout>
+    );
+  }
 
   if (!service) {
     return (
@@ -104,8 +121,8 @@ const ServiceDetail = () => {
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-warning text-warning" />
-                <span className="font-semibold text-foreground">{service.rating.toFixed(1)}</span>
-                <span className="text-muted-foreground">({service.reviewCount} reviews)</span>
+                <span className="font-semibold text-foreground">{Number(service.rating).toFixed(1)}</span>
+                <span className="text-muted-foreground">({service.review_count} reviews)</span>
               </div>
               {service.duration && (
                 <div className="flex items-center gap-1 text-muted-foreground">
@@ -120,8 +137,8 @@ const ServiceDetail = () => {
           <div className="mb-6">
             <ProviderMiniProfile
               name={service.provider}
-              rating={service.rating}
-              reviewCount={service.reviewCount}
+              rating={Number(service.rating)}
+              reviewCount={service.review_count}
               verified
               specialty="Professional Service Provider"
               onChat={() => toast('Chat feature coming soon!')}
@@ -191,11 +208,11 @@ const ServiceDetail = () => {
           <div>
             <p className="text-sm text-muted-foreground">Starting from</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-primary">${service.price}</span>
-              <span className="text-muted-foreground">/{service.priceUnit}</span>
+              <span className="text-2xl font-bold text-primary">${Number(service.price)}</span>
+              <span className="text-muted-foreground">/{service.price_unit}</span>
             </div>
           </div>
-          <Button 
+          <Button
             size="lg" 
             className="px-8"
             onClick={() => setIsBookingSheetOpen(true)}
@@ -256,7 +273,7 @@ const ServiceDetail = () => {
         <div className="bg-muted/50 rounded-xl p-4 mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-muted-foreground">Service Fee</span>
-            <span className="font-medium text-foreground">${service.price}</span>
+            <span className="font-medium text-foreground">${Number(service.price)}</span>
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-muted-foreground">Platform Fee</span>
@@ -265,7 +282,7 @@ const ServiceDetail = () => {
           <div className="h-px bg-border my-2" />
           <div className="flex justify-between items-center">
             <span className="font-semibold text-foreground">Total</span>
-            <span className="font-bold text-xl text-primary">${service.price + 2}</span>
+            <span className="font-bold text-xl text-primary">${Number(service.price) + 2}</span>
           </div>
         </div>
 
