@@ -27,6 +27,7 @@ import ProviderEarnings from "./pages/provider/ProviderEarnings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminServices from "./pages/admin/AdminServices";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminBookings from "./pages/admin/AdminBookings";
 
@@ -117,6 +118,11 @@ const AppRoutes = () => {
       <Route path="/admin/dashboard" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/services" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminServices />
         </ProtectedRoute>
       } />
       <Route path="/admin/users" element={
