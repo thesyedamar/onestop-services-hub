@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, User, Inbox, Briefcase, DollarSign, Users, LayoutDashboard } from 'lucide-react';
+import { Home, Calendar, User, Inbox, Briefcase, DollarSign, Users, LayoutDashboard, Package } from 'lucide-react';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
 
 interface NavItem {
@@ -24,6 +24,7 @@ const providerNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/admin/dashboard' },
+  { label: 'Services', icon: <Package className="h-5 w-5" />, path: '/admin/services' },
   { label: 'Users', icon: <Users className="h-5 w-5" />, path: '/admin/users' },
   { label: 'Bookings', icon: <Calendar className="h-5 w-5" />, path: '/admin/bookings' },
 ];

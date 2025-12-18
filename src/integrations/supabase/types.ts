@@ -41,6 +41,66 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string
+          distance: string | null
+          duration: string | null
+          featured: boolean | null
+          id: string
+          image: string | null
+          is_active: boolean | null
+          price: number
+          price_unit: string
+          provider: string
+          provider_avatar: string | null
+          rating: number | null
+          review_count: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description: string
+          distance?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          price: number
+          price_unit: string
+          provider: string
+          provider_avatar?: string | null
+          rating?: number | null
+          review_count?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string
+          distance?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          price?: number
+          price_unit?: string
+          provider?: string
+          provider_avatar?: string | null
+          rating?: number | null
+          review_count?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
