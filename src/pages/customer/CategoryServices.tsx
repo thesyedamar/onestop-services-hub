@@ -5,14 +5,16 @@ import { MobileLayout, PageContainer, PageHeader } from '@/components/layout/Mob
 import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { ServiceCard } from '@/components/ui/ServiceCard';
 import { Button } from '@/components/ui/button';
-import { getServicesByCategory, getCategoryById } from '@/data/services';
+import { getCategoryById } from '@/data/services';
+import { useServicesByCategory } from '@/hooks/useServices';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CategoryServices = () => {
   const navigate = useNavigate();
   const { categoryId } = useParams<{ categoryId: string }>();
   
   const category = getCategoryById(categoryId || '');
-  const services = getServicesByCategory(categoryId || '');
+  const { services, loading } = useServicesByCategory(categoryId || '');
 
   if (!category) {
     return (
@@ -71,27 +73,35 @@ const CategoryServices = () => {
 
         {/* Services List */}
         <div className="flex flex-col gap-4">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 }}
-            >
-              <ServiceCard
-                id={service.id}
-                title={service.title}
-                provider={service.provider}
-                rating={service.rating}
-                reviewCount={service.reviewCount}
-                price={service.price}
-                priceUnit={service.priceUnit}
-                duration={service.duration}
-                distance={service.distance}
-                onClick={() => navigate(`/service/${service.id}`)}
-              />
-            </motion.div>
-          ))}
+          {loading ? (
+            <>
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+            </>
+          ) : (
+            services.map((service, index) => (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08 }}
+              >
+                <ServiceCard
+                  id={service.id}
+                  title={service.title}
+                  provider={service.provider}
+                  rating={Number(service.rating)}
+                  reviewCount={service.review_count}
+                  price={Number(service.price)}
+                  priceUnit={service.price_unit}
+                  duration={service.duration || undefined}
+                  distance={service.distance || undefined}
+                  onClick={() => navigate(`/service/${service.id}`)}
+                />
+              </motion.div>
+            ))
+          )}
         </div>
 
         {services.length === 0 && (
