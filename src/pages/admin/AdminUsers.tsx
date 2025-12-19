@@ -1,72 +1,82 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, User, Shield, CheckCircle, XCircle, MoreVertical, Filter } from 'lucide-react';
+import { Search, User, Shield, CheckCircle, XCircle, MoreVertical, Crown } from 'lucide-react';
 import { MobileLayout, PageContainer, PageHeader } from '@/components/layout/MobileLayout';
 import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useAdminUsers, useUpdateUserStatus, useUpdateUserRole } from '@/hooks/useAdminData';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { format } from 'date-fns';
 
-type UserType = 'all' | 'customer' | 'provider' | 'pending';
-
-interface UserItem {
-  id: string;
-  name: string;
-  email: string;
-  type: 'customer' | 'provider';
-  status: 'active' | 'pending' | 'suspended';
-  joinDate: string;
-  verified: boolean;
-}
-
-const mockUsers: UserItem[] = [
-  { id: '1', name: 'Sarah Johnson', email: 'sarah@email.com', type: 'customer', status: 'active', joinDate: 'Dec 1, 2024', verified: true },
-  { id: '2', name: 'John Smith', email: 'john@email.com', type: 'provider', status: 'pending', joinDate: 'Dec 14, 2024', verified: false },
-  { id: '3', name: 'Alice Brown', email: 'alice@email.com', type: 'provider', status: 'active', joinDate: 'Nov 28, 2024', verified: true },
-  { id: '4', name: 'Mike Chen', email: 'mike@email.com', type: 'customer', status: 'active', joinDate: 'Nov 15, 2024', verified: true },
-  { id: '5', name: 'Emily Davis', email: 'emily@email.com', type: 'provider', status: 'pending', joinDate: 'Dec 13, 2024', verified: false },
-  { id: '6', name: 'Bob Wilson', email: 'bob@email.com', type: 'customer', status: 'suspended', joinDate: 'Oct 20, 2024', verified: true },
-];
+type UserFilter = 'all' | 'customer' | 'provider' | 'admin';
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState(mockUsers);
-  const [filter, setFilter] = useState<UserType>('all');
+  const { data: users = [], isLoading } = useAdminUsers();
+  const updateStatus = useUpdateUserStatus();
+  const updateRole = useUpdateUserRole();
+  const [filter, setFilter] = useState<UserFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filters: { key: UserType; label: string }[] = [
+  const filters: { key: UserFilter; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'customer', label: 'Customers' },
     { key: 'provider', label: 'Providers' },
-    { key: 'pending', label: 'Pending' },
+    { key: 'admin', label: 'Admins' },
   ];
 
   const filteredUsers = users.filter((user) => {
-    const matchesFilter = filter === 'all' || 
-      (filter === 'pending' ? user.status === 'pending' : user.type === filter);
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filter === 'all' || user.role === filter;
+    const matchesSearch = 
+      (user.full_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const handleApprove = (id: string) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: 'active' as const, verified: true } : u));
-    toast.success('User approved successfully!');
+  const handleToggleStatus = (userId: string, currentStatus: boolean) => {
+    updateStatus.mutate({ userId, isActive: !currentStatus });
   };
 
-  const handleReject = (id: string) => {
-    setUsers(users.filter(u => u.id !== id));
-    toast('User rejected');
+  const getStatusBadge = (isActive: boolean) => {
+    if (isActive) {
+      return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">Active</span>;
+    }
+    return <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Inactive</span>;
   };
 
-  const getStatusBadge = (status: UserItem['status']) => {
-    const config = {
-      active: { color: 'bg-success/10 text-success', label: 'Active' },
-      pending: { color: 'bg-warning/10 text-warning', label: 'Pending' },
-      suspended: { color: 'bg-destructive/10 text-destructive', label: 'Suspended' },
-    };
-    const { color, label } = config[status];
-    return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>{label}</span>;
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return <Crown className="h-6 w-6 text-warning" />;
+      case 'provider':
+        return <Shield className="h-6 w-6 text-accent" />;
+      default:
+        return <User className="h-6 w-6 text-primary" />;
+    }
   };
+
+  const getRoleBgClass = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-warning/10';
+      case 'provider':
+        return 'bg-accent-soft';
+      default:
+        return 'bg-primary-soft';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <MobileLayout>
+        <PageHeader title="Users" subtitle="Loading..." />
+        <PageContainer className="flex items-center justify-center min-h-[50vh]">
+          <LoadingSpinner />
+        </PageContainer>
+        <BottomNavBar />
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout>
@@ -119,25 +129,24 @@ const AdminUsers = () => {
                 className="bg-card rounded-xl p-4 border border-border/50"
               >
                 <div className="flex items-start gap-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    user.type === 'provider' ? 'bg-accent-soft' : 'bg-primary-soft'
-                  }`}>
-                    {user.type === 'provider' ? (
-                      <Shield className={`h-6 w-6 ${user.verified ? 'text-accent' : 'text-muted-foreground'}`} />
-                    ) : (
-                      <User className="h-6 w-6 text-primary" />
-                    )}
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getRoleBgClass(user.role)}`}>
+                    {getRoleIcon(user.role)}
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-semibold text-foreground truncate">{user.name}</h4>
+                      <h4 className="font-semibold text-foreground truncate">
+                        {user.full_name || 'Unnamed User'}
+                      </h4>
                       {user.verified && <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                    <p className="text-sm text-muted-foreground truncate">{user.phone || user.email}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {getStatusBadge(user.status)}
-                      <span className="text-xs text-muted-foreground">{user.joinDate}</span>
+                      {getStatusBadge(user.is_active)}
+                      <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(user.created_at), 'MMM d, yyyy')}
+                      </span>
                     </div>
                   </div>
 
@@ -146,29 +155,30 @@ const AdminUsers = () => {
                   </Button>
                 </div>
 
-                {/* Pending Actions */}
-                {user.status === 'pending' && (
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
-                      onClick={() => handleReject(user.id)}
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Reject
-                    </Button>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleApprove(user.id)}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                )}
+                {/* Actions */}
+                <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex-1 ${user.is_active 
+                      ? 'border-destructive/30 text-destructive hover:bg-destructive/10' 
+                      : 'border-success/30 text-success hover:bg-success/10'}`}
+                    onClick={() => handleToggleStatus(user.id, user.is_active)}
+                    disabled={updateStatus.isPending}
+                  >
+                    {user.is_active ? (
+                      <>
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Deactivate
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Activate
+                      </>
+                    )}
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </div>

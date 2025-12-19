@@ -30,6 +30,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminCategories from "./pages/admin/AdminCategories";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +134,11 @@ const AppRoutes = () => {
       <Route path="/admin/bookings" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminBookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/categories" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminCategories />
         </ProtectedRoute>
       } />
 
