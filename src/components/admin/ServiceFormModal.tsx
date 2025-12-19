@@ -18,6 +18,8 @@ interface Service {
   description: string;
   provider: string;
   provider_avatar: string | null;
+  provider_phone: string | null;
+  address: string | null;
   rating: number;
   review_count: number;
   price: number;
@@ -41,6 +43,8 @@ const initialFormData = {
   title: '',
   description: '',
   provider: '',
+  provider_phone: '',
+  address: '',
   price: '',
   price_unit: 'hr',
   duration: '',
@@ -59,6 +63,8 @@ export const ServiceFormModal = ({ isOpen, onClose, onSave, service }: ServiceFo
         title: service.title,
         description: service.description,
         provider: service.provider,
+        provider_phone: service.provider_phone || '',
+        address: service.address || '',
         price: service.price.toString(),
         price_unit: service.price_unit,
         duration: service.duration || '',
@@ -73,7 +79,7 @@ export const ServiceFormModal = ({ isOpen, onClose, onSave, service }: ServiceFo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.category_id || !formData.title || !formData.provider || !formData.price) {
+    if (!formData.category_id || !formData.title || !formData.provider || !formData.price || !formData.provider_phone || !formData.address) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -85,6 +91,8 @@ export const ServiceFormModal = ({ isOpen, onClose, onSave, service }: ServiceFo
       title: formData.title.trim(),
       description: formData.description.trim(),
       provider: formData.provider.trim(),
+      provider_phone: formData.provider_phone.trim(),
+      address: formData.address.trim(),
       price: parseFloat(formData.price),
       price_unit: formData.price_unit,
       duration: formData.duration || null,
@@ -194,6 +202,27 @@ export const ServiceFormModal = ({ isOpen, onClose, onSave, service }: ServiceFo
                 value={formData.provider}
                 onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
                 placeholder="e.g., CleanPro Services"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="provider_phone">Phone Number *</Label>
+              <Input
+                id="provider_phone"
+                type="tel"
+                value={formData.provider_phone}
+                onChange={(e) => setFormData({ ...formData, provider_phone: e.target.value })}
+                placeholder="e.g., +1 234 567 8900"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="address">Location / Address *</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="e.g., 123 Main St, City"
               />
             </div>
 

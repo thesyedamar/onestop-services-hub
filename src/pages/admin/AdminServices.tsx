@@ -17,6 +17,8 @@ interface Service {
   description: string;
   provider: string;
   provider_avatar: string | null;
+  provider_phone: string | null;
+  address: string | null;
   rating: number;
   review_count: number;
   price: number;
