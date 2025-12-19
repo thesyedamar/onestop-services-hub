@@ -16,90 +16,176 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string
           full_name: string | null
           id: string
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
           phone: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
           updated_at?: string
         }
         Relationships: []
       }
       services: {
         Row: {
+          address: string | null
+          availability: Json | null
           category_id: string
           created_at: string
           description: string
           distance: string | null
           duration: string | null
+          estimated_duration: string | null
           featured: boolean | null
           id: string
           image: string | null
           is_active: boolean | null
+          is_emergency: boolean | null
+          latitude: number | null
+          longitude: number | null
           price: number
           price_unit: string
           provider: string
+          provider_approved: boolean | null
           provider_avatar: string | null
+          provider_id: string | null
+          provider_phone: string | null
           rating: number | null
           review_count: number | null
           title: string
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          availability?: Json | null
           category_id: string
           created_at?: string
           description: string
           distance?: string | null
           duration?: string | null
+          estimated_duration?: string | null
           featured?: boolean | null
           id?: string
           image?: string | null
           is_active?: boolean | null
+          is_emergency?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           price: number
           price_unit: string
           provider: string
+          provider_approved?: boolean | null
           provider_avatar?: string | null
+          provider_id?: string | null
+          provider_phone?: string | null
           rating?: number | null
           review_count?: number | null
           title: string
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          availability?: Json | null
           category_id?: string
           created_at?: string
           description?: string
           distance?: string | null
           duration?: string | null
+          estimated_duration?: string | null
           featured?: boolean | null
           id?: string
           image?: string | null
           is_active?: boolean | null
+          is_emergency?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           price?: number
           price_unit?: string
           provider?: string
+          provider_approved?: boolean | null
           provider_avatar?: string | null
+          provider_id?: string | null
+          provider_phone?: string | null
           rating?: number | null
           review_count?: number | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
