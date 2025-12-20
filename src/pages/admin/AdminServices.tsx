@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Search, Star } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Star, Phone, MapPin } from 'lucide-react';
 import { MobileLayout, PageContainer, PageHeader } from '@/components/layout/MobileLayout';
 import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { Button } from '@/components/ui/button';
@@ -176,6 +176,22 @@ const AdminServices = () => {
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                   {service.description}
                 </p>
+
+                {/* Phone and Address */}
+                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-2">
+                  {service.provider_phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {service.provider_phone}
+                    </span>
+                  )}
+                  {service.address && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {service.address}
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">

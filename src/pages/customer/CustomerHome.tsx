@@ -147,6 +147,8 @@ const CustomerHome = () => {
                     id={service.id}
                     title={service.title}
                     provider={service.provider}
+                    providerPhone={service.provider_phone || undefined}
+                    address={service.address || undefined}
                     rating={Number(service.rating)}
                     reviewCount={service.review_count}
                     price={Number(service.price)}
