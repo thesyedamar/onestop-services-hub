@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
-import { Star, Clock, MapPin } from 'lucide-react';
+import { Star, Clock, MapPin, Phone } from 'lucide-react';
 
 interface ServiceCardProps {
   id: string;
   title: string;
   provider: string;
   providerAvatar?: string;
+  providerPhone?: string;
+  address?: string;
   rating: number;
   reviewCount: number;
   price: number;
@@ -20,6 +22,8 @@ export const ServiceCard = ({
   title,
   provider,
   providerAvatar,
+  providerPhone,
+  address,
   rating,
   reviewCount,
   price,
@@ -79,6 +83,24 @@ export const ServiceCard = ({
             </div>
           )}
         </div>
+
+        {/* Contact Info */}
+        {(providerPhone || address) && (
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-3">
+            {providerPhone && (
+              <span className="flex items-center gap-1">
+                <Phone className="h-3 w-3" />
+                {providerPhone}
+              </span>
+            )}
+            {address && (
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {address}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-baseline gap-1">
