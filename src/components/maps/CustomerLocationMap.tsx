@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Loader2, Navigation } from 'lucide-react';
-import MapboxMap from './MapboxMap';
+import LeafletMap from './LeafletMap';
 import { useRealtimeCustomerLocation } from '@/hooks/useUserLocation';
 
 interface CustomerLocationMapProps {
@@ -67,14 +67,13 @@ const CustomerLocationMap: React.FC<CustomerLocationMapProps> = ({
         </div>
       )}
 
-      <MapboxMap
+      <LeafletMap
         latitude={location.latitude}
         longitude={location.longitude}
         zoom={15}
         markerLabel={`${customerName}'s Location`}
         className="h-48"
         interactive={true}
-        showControls={true}
       />
 
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
