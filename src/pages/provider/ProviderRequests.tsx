@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, MapPin, DollarSign, Check, X, User } from 'lucide-react';
+import { Clock, MapPin, DollarSign, Check, X, User, Navigation } from 'lucide-react';
 import { MobileLayout, PageContainer, PageHeader } from '@/components/layout/MobileLayout';
 import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import CustomerLocationMap from '@/components/maps/CustomerLocationMap';
 
 interface ServiceRequest {
   id: string;
+  customerId: string;
   customer: string;
   service: string;
   date: string;
@@ -18,13 +20,14 @@ interface ServiceRequest {
 }
 
 const mockRequests: ServiceRequest[] = [
-  { id: '1', customer: 'Sarah Johnson', service: 'Deep House Cleaning', date: 'Today', time: '2:00 PM', location: '123 Main St, Apt 4B', price: 80, urgent: true },
-  { id: '2', customer: 'Mike Chen', service: 'Deep House Cleaning', date: 'Tomorrow', time: '10:00 AM', location: '456 Oak Ave', price: 80 },
-  { id: '3', customer: 'Emily Davis', service: 'Standard Cleaning', date: 'Dec 18', time: '3:00 PM', location: '789 Pine Rd', price: 50 },
+  { id: '1', customerId: 'customer-1', customer: 'Sarah Johnson', service: 'Deep House Cleaning', date: 'Today', time: '2:00 PM', location: '123 Main St, Apt 4B', price: 80, urgent: true },
+  { id: '2', customerId: 'customer-2', customer: 'Mike Chen', service: 'Deep House Cleaning', date: 'Tomorrow', time: '10:00 AM', location: '456 Oak Ave', price: 80 },
+  { id: '3', customerId: 'customer-3', customer: 'Emily Davis', service: 'Standard Cleaning', date: 'Dec 18', time: '3:00 PM', location: '789 Pine Rd', price: 50 },
 ];
 
 const ProviderRequests = () => {
   const [requests, setRequests] = useState(mockRequests);
+  const [expandedMap, setExpandedMap] = useState<string | null>(null);
 
   const handleAccept = (id: string) => {
     setRequests(requests.filter(r => r.id !== id));
@@ -34,6 +37,10 @@ const ProviderRequests = () => {
   const handleDecline = (id: string) => {
     setRequests(requests.filter(r => r.id !== id));
     toast('Request declined');
+  };
+
+  const toggleMap = (id: string) => {
+    setExpandedMap(expandedMap === id ? null : id);
   };
 
   return (
@@ -96,15 +103,35 @@ const ProviderRequests = () => {
                       <Clock className="h-4 w-4" />
                       <span>{request.date} at {request.time}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{request.location}</span>
-                    </div>
+                    <button 
+                      onClick={() => toggleMap(request.id)}
+                      className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+                    >
+                      <Navigation className="h-4 w-4" />
+                      <span className="underline">View Customer Location</span>
+                    </button>
                     <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                       <DollarSign className="h-4 w-4 text-success" />
                       <span className="text-success">${request.price} earnings</span>
                     </div>
                   </div>
+
+                  {/* Customer Location Map */}
+                  <AnimatePresence>
+                    {expandedMap === request.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-4 overflow-hidden"
+                      >
+                        <CustomerLocationMap 
+                          customerId={request.customerId}
+                          customerName={request.customer.split(' ')[0]}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Actions */}
                   <div className="flex gap-3">
