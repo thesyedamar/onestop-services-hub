@@ -7,6 +7,7 @@ import { BottomNavBar } from '@/components/navigation/BottomNavBar';
 import { Button } from '@/components/ui/button';
 import { BookingProgressIndicator, BookingStatus as BookingStatusType } from '@/components/ui/BookingProgressIndicator';
 import { ProviderMiniProfile } from '@/components/ui/ProviderMiniProfile';
+import LocationPicker from '@/components/maps/LocationPicker';
 import { toast } from 'sonner';
 
 const BookingStatus = () => {
@@ -68,21 +69,18 @@ const BookingStatus = () => {
           />
         </motion.div>
 
-        {/* Live Map Placeholder */}
-        {(status === 'on_the_way' || status === 'arrived') && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-muted rounded-2xl h-48 mb-6 flex items-center justify-center relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
-            <div className="text-center relative z-10">
-              <MapPin className="h-10 w-10 text-primary mx-auto mb-2 animate-bounce-subtle" />
-              <p className="text-muted-foreground font-medium">Live tracking</p>
-              <p className="text-sm text-muted-foreground">Provider is {status === 'on_the_way' ? '5 min away' : 'at your location'}</p>
-            </div>
-          </motion.div>
-        )}
+        {/* Location Picker - Always show so provider knows where to go */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-card rounded-2xl p-4 border border-border/50 shadow-sm mb-6"
+        >
+          <LocationPicker 
+            onLocationConfirmed={(lat, lng, address) => {
+              toast.success('Location shared with provider!');
+            }}
+          />
+        </motion.div>
 
         {/* Provider Info */}
         <motion.div
