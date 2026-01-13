@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Loader2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MapboxMap from './MapboxMap';
+import LeafletMap from './LeafletMap';
 import { useUserLocation } from '@/hooks/useUserLocation';
 
 interface LocationPickerProps {
@@ -73,7 +73,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               {location.address || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
             </p>
           </div>
-          <MapboxMap
+          <LeafletMap
             latitude={location.latitude}
             longitude={location.longitude}
             zoom={15}
